@@ -52,9 +52,9 @@ impl MysqlShim<net::TcpStream> for MysqlBackend {
                             colflags: c.flags(),
                         })
                         .collect();
-                    let rw = results.start(schema.as_slice())?;
+                    let mut rw = results.start(schema.as_slice())?;
                     for row in mres {
-                        //rw.write_row(row)?;
+                        rw.write_row(row.unwrap().unwrap())?;
                     }
                     rw.finish()
                 } else {

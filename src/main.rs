@@ -1,7 +1,7 @@
 extern crate msql_srv;
 extern crate mysql;
 extern crate mysql_common as myc;
-//extern crate nom;
+extern crate nom_sql;
 
 use std::error::Error;
 use std::thread;
@@ -40,7 +40,11 @@ impl MysqlShim<net::TcpStream> for MysqlBackend {
         query: &str,
         results: QueryResultWriter<net::TcpStream>,
     ) -> io::Result<()> {
-        print!("query: {}", query);
+        match nom_sql::parse_query(&format!("{};", query)) {
+            Ok(_) => print!("OK: {}", query),
+            Err(_) => print!("FAIL: {}", query),
+        }
+
         match self.conn.query(query) {
             Ok(mut mres) => {
                 let schema: Vec<_> = mres.columns_ref()

@@ -5,7 +5,6 @@ authors = ["Malte Schwarzkopf <malte@csail.mit.edu>"]
 
 [dependencies]
 msql-srv = "0.5"
-#nom_sql = { path = "../nom-sqlp" }
-#nom_sql = { git = "https://github.com/ms705/nom-sql.git", rev = "75cec7e5c9104dd9ffbe979b6d881546a7ed2677" }
 mysql_common = "0.5"
 mysql = "12.0.4"
+nom_sql = { git = "https://github.com/ms705/nom-sql.git", rev = "884e763ad7fe8bb49061c42131b377a387708e09" }

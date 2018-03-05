@@ -40,28 +40,37 @@ impl MysqlShim<net::TcpStream> for MysqlBackend {
         query: &str,
         results: QueryResultWriter<net::TcpStream>,
     ) -> io::Result<()> {
+        print!("query: {}", query);
         match self.conn.query(query) {
-            Ok(mres) => {
-                if mres.affected_rows() > 0 {
-                    let schema: Vec<_> = mres.columns_ref()
-                        .iter()
-                        .map(|c| Column {
-                            table: c.table_str().to_string(),
-                            column: c.name_str().to_string(),
-                            coltype: c.column_type(),
-                            colflags: c.flags(),
-                        })
-                        .collect();
-                    let mut rw = results.start(schema.as_slice())?;
-                    for row in mres {
-                        rw.write_row(row.unwrap().unwrap())?;
+            Ok(mut mres) => {
+                let schema: Vec<_> = mres.columns_ref()
+                    .iter()
+                    .map(|c| Column {
+                        table: c.table_str().to_string(),
+                        column: c.name_str().to_string(),
+                        coltype: c.column_type(),
+                        colflags: c.flags(),
+                    })
+                    .collect();
+
+                let rows: Vec<_> = mres.by_ref().collect();
+                if rows.len() > 0 {
+                    println!(" -> Ok({} rows)", rows.len());
+
+                    let mut writer = results.start(schema.as_slice())?;
+                    for r in rows {
+                        writer.write_row(r.unwrap().unwrap())?;
                     }
-                    rw.finish()
+                    writer.finish()
                 } else {
-                    results.completed(mres.affected_rows(), mres.last_insert_id())
+                    println!(" -> Ok({} affected rows)", mres.affected_rows());
+                    return results.completed(mres.affected_rows(), mres.last_insert_id());
                 }
             }
-            Err(e) => results.error(ErrorKind::ER_UNKNOWN_ERROR, e.description().as_bytes()),
+            Err(e) => {
+                println!(" -> Err({:?}", e);
+                results.error(ErrorKind::ER_UNKNOWN_ERROR, e.description().as_bytes())
+            }
         }
     }
 }

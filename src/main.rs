@@ -69,7 +69,7 @@ impl MysqlShim<net::TcpStream> for MysqlBackend {
                     writer.finish()
                 } else {
                     println!(" -> Ok({} affected rows)", mres.affected_rows());
-                    return results.completed(mres.affected_rows(), mres.last_insert_id());
+                    results.completed(mres.affected_rows(), mres.last_insert_id())
                 }
             }
             Err(e) => {

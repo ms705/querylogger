@@ -40,12 +40,14 @@ impl MysqlShim<net::TcpStream> for MysqlBackend {
         query: &str,
         results: QueryResultWriter<net::TcpStream>,
     ) -> io::Result<()> {
+        let query = query.replace("\n", " ");
+
         match nom_sql::parse_query(&format!("{};", query)) {
             Ok(_) => print!("OK: {}", query),
             Err(_) => print!("FAIL: {}", query),
         }
 
-        match self.conn.query(query) {
+        match self.conn.query(&query) {
             Ok(mut mres) => {
                 let schema: Vec<_> = mres.columns_ref()
                     .iter()

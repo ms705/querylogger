@@ -61,7 +61,7 @@ impl MysqlShim<net::TcpStream> for MysqlBackend {
 
                 let rows: Vec<_> = mres.by_ref().collect();
                 if rows.len() > 0 || query.to_lowercase().starts_with("select")
-                    || query.to_lowercase().starts_with("show") {
+                    || query.to_lowercase().starts_with("show") || query.to_lowercase().starts_with("set") {
                     println!(" -> Ok({} rows)", rows.len());
 
                     let mut writer = results.start(schema.as_slice())?;
